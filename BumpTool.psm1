@@ -1,27 +1,15 @@
-# File: ./BumpTool/BumpTool.psm1
-
 # $PSScriptRoot is a magic variable: the directory this .psm1 file is in.
 $PublicFunctions = "$PSScriptRoot\functions"
 $PrivateFunctions = "$PSScriptRoot\private"
 
 # --- 1. Define Configuration ---
-# We store settings in a standard user-data location
-$configDir = [System.IO.Path]::Combine(
-    [System.Environment]::GetFolderPath('ApplicationData'),
-    'BumpTool'
-)
-$configFile = [System.IO.Path]::Combine($configDir, 'config.json')
-
-# --- CONFIG PATHS FIRST ---
-$Global:configDir = [System.IO.Path]::Combine(
-    [System.Environment]::GetFolderPath('ApplicationData'),
-    'BumpTool'
-)
-$Global:configFile = [System.IO.Path]::Combine($Global:configDir, 'config.json')
+# Use the same logic as Get-BumpConfig.ps1
+$Global:configDir  = Join-Path $env:USERPROFILE "Documents\BumpTool"
+$Global:configFile = Join-Path $Global:configDir "bump-config.json"
 
 # Ensure directory exists before anything else
 if (-not (Test-Path $Global:configDir)) {
-    New-Item -Path $Global:configDir -ItemType Directory | Out-Null
+    New-Item -Path $Global:configDir -ItemType Directory | Out-Null 
 }
 
 # Export config path for other functions to use

@@ -6,16 +6,16 @@ function Export-AuditLog {
         [string]$OutputPath
     )
 
-    $config = Get-BumpConfig
     $repoName = try { (git rev-parse --show-toplevel 2>$null | Split-Path -Leaf) } catch { "default" }
-    $auditPath = Join-Path (Join-Path $env:APPDATA "BumpTool\audits") "$repoName.json"
+    $baseDir = Join-Path $env:USERPROFILE "Documents\BumpTool\logs"
+    $auditFile = Join-Path $baseDir "$repoName\bump-audit.json"
 
-    if (-not (Test-Path $auditPath)) {
-        Write-Error "No audit log found for '$repoName'."
+    if (-not (Test-Path $auditFile)) {
+        Write-Error "No audit log found for '$repoName' at $auditFile."
         return
     }
 
-    $entries = Get-Content $auditPath -Raw | ConvertFrom-Json
+    $entries = Get-Content $auditFile -Raw | ConvertFrom-Json
 
     if (-not $OutputPath) {
         $OutputPath = Join-Path (Get-Location) "bump-audit-export.$Format"
@@ -26,13 +26,9 @@ function Export-AuditLog {
             $entries | ConvertTo-Json -Depth 5 | Out-File -FilePath $OutputPath -Encoding utf8
         }
         "csv" {
-            $entries | ForEach-Object {
-                [PSCustomObject]@{
-                    Timestamp = $_.Timestamp
-                    Action    = $_.Action
-                    Details   = ($_?.Data | ConvertTo-Json -Compress)
-                }
-            } | Export-Csv -Path $OutputPath -NoTypeInformation -Encoding utf8
+            # Flatten the object for CSV export
+            $entries | Select-Object Timestamp, Repository, Branch, OldVersion, NewVersion, BumpType, CommitMessage, User, Machine, GitCommitHash |
+                Export-Csv -Path $OutputPath -NoTypeInformation -Encoding utf8
         }
     }
 

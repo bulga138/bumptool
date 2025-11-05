@@ -1,4 +1,3 @@
-# File: ./BumpTool/private/Set-ClipboardHelper.ps1
 function Set-ClipboardHelper {
     param(
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]

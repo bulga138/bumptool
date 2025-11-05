@@ -1,5 +1,3 @@
-# File: ./BumpTool/BumpTool.psd1
-
 @{
     # Version of your module
     ModuleVersion     = '1.0.0'
@@ -22,12 +20,7 @@
         'bump-minor',
         'bump-major'
     )
-
-    # The aliases we want to create
-    AliasesToExport   = @(
-    )
     
-    # --- THIS SECTION IS UPDATED ---
     # We now depend on ConsoleGuiTools, which includes Terminal.Gui
     RequiredModules   = @(
         @{

@@ -4,8 +4,7 @@ function Clear-AuditLog {
         [switch]$All
     )
 
-    $config = Get-BumpConfig
-    $baseDir = Join-Path $env:APPDATA "BumpTool\audits"
+    $baseDir = Join-Path $env:USERPROFILE "Documents\BumpTool\logs"
 
     if ($All -and (Test-Path $baseDir)) {
         Remove-Item -Path $baseDir -Recurse -Force
@@ -15,12 +14,12 @@ function Clear-AuditLog {
 
     # Determine path for current repo
     $repoName = try { (git rev-parse --show-toplevel 2>$null | Split-Path -Leaf) } catch { "default" }
-    $auditPath = Join-Path $baseDir "$repoName.json"
+    $repoAuditDir = Join-Path $baseDir $repoName
 
-    if (Test-Path $auditPath) {
-        Remove-Item -Path $auditPath -Force
+    if (Test-Path $repoAuditDir) {
+        Remove-Item -Path $repoAuditDir -Recurse -Force
         Write-Host "🧹 Cleared audit log for repository '$repoName'."
     } else {
-        Write-Host "No audit log found for '$repoName'."
+        Write-Host "No audit log found for '$repoName' at $repoAuditDir."
     }
 }

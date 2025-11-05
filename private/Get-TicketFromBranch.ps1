@@ -1,4 +1,3 @@
-# File: ./BumpTool/private/Get-TicketFromBranch.ps1
 function Get-TicketFromBranch {
     param (
         [string]$Branch,
