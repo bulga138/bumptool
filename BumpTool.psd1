@@ -16,7 +16,8 @@
     # The functions we want to make public
     FunctionsToExport = @(
         'Invoke-BumpVersion',
-        'Set-BumpConfig'
+        'Set-BumpConfig',
+        'Show-BumpAudit',
         'bump-patch',
         'bump-minor',
         'bump-major'

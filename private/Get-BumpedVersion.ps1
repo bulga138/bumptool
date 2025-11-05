@@ -1,27 +1,48 @@
-# File: ./BumpTool/private/Get-BumpedVersion.ps1
 function Get-BumpedVersion {
     <#
     .SYNOPSIS
     Calculates a bumped version string (for --dry-run).
     #>
     param(
-        [string]$Version = "0.0.0",
-        [string]$BumpType = "patch"
+        [Parameter(Mandatory=$true)][string]$Version,
+        [ValidateSet("patch","minor","major")][string]$BumpType = "patch"
     )
 
-    # Strip prerelease/metadata (e.g., 1.2.3-beta+456 -> 1.2.3)
-    $cleanVersion = $Version -split '[-+]'[0]
-    
+    # Normalize input: strip leading "v" or "V"
+    $v = $Version.Trim()
+    if ($v.StartsWith('v') -or $v.StartsWith('V')) {
+        $v = $v.Substring(1)
+    }
+
+    # Remove pre-release/build metadata (anything after '-' or '+')
+    # Use parentheses so we index the split result, not the literal split pattern.
+    $cleanVersion = ($v -split '[-+]')[0]
+
+    if ([string]::IsNullOrWhiteSpace($cleanVersion)) {
+        $cleanVersion = "0.0.0"
+    }
+
+    # Split into parts and pad to 3 components
     $parts = $cleanVersion.Split('.')
-    
-    # Safely parse major, minor, patch, defaulting to 0
-    [int]$major = 0; [int]::TryParse($parts[0], [ref]$major) | Out-Null
-    [int]$minor = 0; if ($parts.Length -gt 1) { [int]::TryParse($parts[1], [ref]$minor) | Out-Null }
-    [int]$patch = 0; if ($parts.Length -gt 2) { [int]::TryParse($parts[2], [ref]$patch) | Out-Null }
+    # Ensure we have 3 numeric parts
+    for ($i = $parts.Count; $i -lt 3; $i++) {
+        $parts += '0'
+    }
+
+    # Parse parts safely
+    $major = 0; $minor = 0; $patch = 0
+    [int]::TryParse($parts[0], [ref]$major) | Out-Null
+    [int]::TryParse($parts[1], [ref]$minor) | Out-Null
+    [int]::TryParse($parts[2], [ref]$patch) | Out-Null
 
     switch ($BumpType) {
-        "major" { return "$([int]$major + 1).0.0" }
-        "minor" { return "$major.$([int]$minor + 1).0" }
-        default { return "$major.$minor.$([int]$patch + 1)" }
+        "patch" { $patch += 1 }
+        "minor" { $minor += 1; $patch = 0 }
+        "major" { $major += 1; $minor = 0; $patch = 0 }
+        default { $patch += 1 }
     }
+
+    $newVersion = "{0}.{1}.{2}" -f $major, $minor, $patch
+
+    return $newVersion
 }

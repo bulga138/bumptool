@@ -12,6 +12,18 @@ $configDir = [System.IO.Path]::Combine(
 )
 $configFile = [System.IO.Path]::Combine($configDir, 'config.json')
 
+# --- CONFIG PATHS FIRST ---
+$Global:configDir = [System.IO.Path]::Combine(
+    [System.Environment]::GetFolderPath('ApplicationData'),
+    'BumpTool'
+)
+$Global:configFile = [System.IO.Path]::Combine($Global:configDir, 'config.json')
+
+# Ensure directory exists before anything else
+if (-not (Test-Path $Global:configDir)) {
+    New-Item -Path $Global:configDir -ItemType Directory | Out-Null
+}
+
 # Export config path for other functions to use
 Export-ModuleMember -Variable configDir, configFile
 
